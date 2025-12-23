@@ -171,7 +171,7 @@
     </div>
      
     <audio id="bg-music" loop crossorigin="anonymous"></audio>
- 
+     
     <script type="module">
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -573,352 +573,586 @@
             STATE.currentThemeIndex = themeIndex; triggerFireworks(5);
             const titleEl = document.getElementById('main-title');
             if (titleEl) {
-                if (themeIndex === 0) { titleEl.style.color = '#d4af37'; titleEl.style.textShadow = '0 0 15px rgba(212, 175, 55, 0.4), 0 0 30px rgba(212, 175, 55, 0.2)'; } 
-                else if (themeIndex === 1) { titleEl.style.color = '#e0ffff'; titleEl.style.textShadow = '0 0 15px rgba(0, 255, 255, 0.6), 0 0 30px rgba(0, 255, 255, 0.4), 0 0 45px rgba(170, 221, 255, 0.3)'; } 
-                else if (themeIndex === 2) { titleEl.style.color = '#ff69b4'; titleEl.style.textShadow = '0 0 15px rgba(255, 22, 148, 0.6), 0 0 30px rgba(255, 183, 197, 0.4)'; }
-            }
-            renderer.toneMappingExposure = (themeIndex === 1) ? 1.2 : (themeIndex === 2 ? 0.9 : 1.0);
-            if (galaxySystem) galaxySystem.visible = (themeIndex === 0);
-            if (snowSystem) snowSystem.visible = (themeIndex === 1);
-            if (heartSystem) heartSystem.visible = (themeIndex === 2);
-            const fogColor = (themeIndex === 2) ? 0x1a0510 : ((themeIndex === 1) ? 0x000510 : CONFIG.colors.bg);
-            scene.fog.color.setHex(fogColor); scene.background.setHex(fogColor);
- 
-            particleSystem.forEach(p => {
-                if (p.isDust) {
-                    if (themeIndex === 2) p.mesh.material.color.setHex(CONFIG.colors.barbieSoft);
-                    else if (themeIndex === 1) p.mesh.material.color.setHex(CONFIG.colors.iceCyan); 
-                    else p.mesh.material.color.setHex(0xffffee);
-                    return;
-                }
-                if (p.type === 'PHOTO') {
-                    const group = p.mesh; let frameMat;
-                    if(themeIndex === 0) frameMat = matLib.frameGold; else if(themeIndex === 1) frameMat = matLib.frameIce; else frameMat = matLib.frameBarbie;
-                    if (group.children[0]) group.children[0].material = frameMat; if (group.children[2]) group.children[2].visible = (themeIndex !== 0); 
-                    return;
-                }
-                let newMat;
                 if (themeIndex === 0) { 
-                    if(p.type.includes('GOLD')) newMat = matLib.gold; else if(p.type === 'BOX') newMat = matLib.green; else if(p.type === 'RED') newMat = matLib.red; else if(p.type === 'CANE') newMat = matLib.candy;
+                    titleEl.style.color = '#d4af37'; 
+                    titleEl.style.textShadow = '0 0 15px rgba(212, 175, 55, 0.4), 0 0 30px rgba(212, 175, 55, 0.2)'; 
+                    titleEl.style.backgroundImage = 'linear-gradient(180deg, #fffdf0 0%, #eacda3 30%, #d6ae7b 60%, #8b6c42 100%)';
                 } else if (themeIndex === 1) { 
-                    if(p.type === 'GOLD_SPHERE') newMat = matLib.frozenCyan; else if(p.type === 'GOLD_BOX' || p.type === 'BOX') newMat = matLib.ice; else if(p.type === 'RED') newMat = matLib.frozenMagenta; else if(p.type === 'CANE') newMat = matLib.snow; 
-                } else if (themeIndex === 2) { 
-                    if(p.type.includes('GOLD')) newMat = matLib.barbieMain; else if(p.type === 'BOX') newMat = matLib.barbieSoft; else if(p.type === 'RED') newMat = matLib.pearl; else if(p.type === 'CANE') newMat = matLib.barbieMain; 
+                    titleEl.style.color = '#e0ffff'; 
+                    titleEl.style.textShadow = '0 0 15px rgba(0, 255, 255, 0.6), 0 0 30px rgba(0, 255, 255, 0.4), 0 0 45px rgba(170, 221, 255, 0.3)'; 
+                    titleEl.style.backgroundImage = 'linear-gradient(180deg, #e0ffff 0%, #b4e1f3 30%, #87ceeb 60%, #4682b4 100%)';
+                } else if (themeIndex === 2) {
+                    titleEl.style.color = '#ff1694';
+                    titleEl.style.textShadow = '0 0 15px rgba(255, 22, 148, 0.6), 0 0 30px rgba(255, 183, 197, 0.4)';
+                    titleEl.style.backgroundImage = 'linear-gradient(180deg, #ffb7c5 0%, #ff69b4 30%, #ff1694 60%, #c71585 100%)';
                 }
-                if (newMat) p.mesh.material = newMat;
+            }
+            
+            // 更新主题材质
+            updateThemeMaterials(themeIndex);
+            
+            // 更新背景效果
+            updateBackgroundEffects(themeIndex);
+        }
+        
+        function updateThemeMaterials(themeIndex) {
+            // 重置所有粒子材质
+            particleSystem.forEach(particle => {
+                if (particle.isDust) return;
+                
+                switch(themeIndex) {
+                    case 0: // 金色主题
+                        if (particle.type === 'BOX') particle.mesh.material = matLib.green;
+                        else if (particle.type === 'GOLD_BOX' || particle.type === 'GOLD_SPHERE') particle.mesh.material = matLib.gold;
+                        else if (particle.type === 'RED') particle.mesh.material = matLib.red;
+                        else if (particle.type === 'CANE') particle.mesh.material = matLib.candy;
+                        break;
+                        
+                    case 1: // 冰雪主题
+                        if (particle.type === 'BOX') particle.mesh.material = matLib.ice;
+                        else if (particle.type === 'GOLD_BOX' || particle.type === 'GOLD_SPHERE') particle.mesh.material = matLib.frozenCyan;
+                        else if (particle.type === 'RED') particle.mesh.material = matLib.frozenMagenta;
+                        else if (particle.type === 'CANE') particle.mesh.material = matLib.snow;
+                        break;
+                        
+                    case 2: // 芭比主题
+                        if (particle.type === 'BOX') particle.mesh.material = matLib.barbieSoft;
+                        else if (particle.type === 'GOLD_BOX' || particle.type === 'GOLD_SPHERE') particle.mesh.material = matLib.barbieMain;
+                        else if (particle.type === 'RED') particle.mesh.material = matLib.barbieMain;
+                        else if (particle.type === 'CANE') particle.mesh.material = matLib.pearl;
+                        break;
+                }
             });
-            if (STATE.starMesh && STATE.starHaloMesh) {
-                if(themeIndex === 0) { STATE.starMesh.material = matLib.starGold; STATE.starHaloMesh.material.color.setHex(0xffaa00); } 
-                else if(themeIndex === 1) { STATE.starMesh.material = matLib.starIce; STATE.starHaloMesh.material.color.setHex(CONFIG.colors.iceCyan); } 
-                else { STATE.starMesh.material = matLib.starBarbie; STATE.starHaloMesh.material.color.setHex(CONFIG.colors.barbieHot); }
+            
+            // 更新星星材质
+            if (themeIndex === 0) {
+                STATE.starMesh.material = matLib.starGold;
+                STATE.starHaloMesh.material.color.set(0xffaa00);
+            } else if (themeIndex === 1) {
+                STATE.starMesh.material = matLib.starIce;
+                STATE.starHaloMesh.material.color.set(0x00ffff);
+            } else if (themeIndex === 2) {
+                STATE.starMesh.material = matLib.starBarbie;
+                STATE.starHaloMesh.material.color.set(0xff0088);
             }
         }
- 
-        function addPhotoToScene(texture) {
-            if (!texture.image) return;
-            const aspect = texture.image.width / texture.image.height;
-            let photoW = (aspect >= 1) ? 1.2 : 1.2 * aspect, photoH = (aspect >= 1) ? 1.2 / aspect : 1.2;
-            const group = new THREE.Group(); const frameGeo = new THREE.BoxGeometry(photoW + 0.15, photoH + 0.15, 0.1);
-            let currentFrameMat;
-            if (STATE.currentThemeIndex === 0) currentFrameMat = matLib.frameGold; else if (STATE.currentThemeIndex === 1) currentFrameMat = matLib.frameIce; else currentFrameMat = matLib.frameBarbie;
-            const frame = new THREE.Mesh(frameGeo, currentFrameMat); group.add(frame);
-            const photo = new THREE.Mesh(new THREE.PlaneGeometry(photoW, photoH), new THREE.MeshBasicMaterial({ map: texture }));
-            photo.position.z = 0.06; group.add(photo);
-            const borderGeo = new THREE.BoxGeometry(photoW + 0.25, photoH + 0.25, 0.08);
-            const border = new THREE.Mesh(borderGeo, matLib.snowBorder); border.position.z = -0.02; border.visible = (STATE.currentThemeIndex !== 0); group.add(border);
-            photoMeshGroup.add(group); particleSystem.push(new Particle(group, 'PHOTO', false));
+        
+        function updateBackgroundEffects(themeIndex) {
+            // 重置所有背景效果
+            snowSystem.visible = false;
+            heartSystem.visible = false;
+            
+            // 根据主题显示不同背景效果
+            if (themeIndex === 1) {
+                snowSystem.visible = true;
+            } else if (themeIndex === 2) {
+                heartSystem.visible = true;
+            }
         }
- 
-        function handleImageUpload(e) {
-            if(!e.target.files.length) return;
-            Array.from(e.target.files).forEach(f => {
+
+        function setupEvents() {
+            // 主题切换按钮
+            document.getElementById('btn-switch-theme').addEventListener('click', () => {
+                const nextTheme = (STATE.currentThemeIndex + 1) % 3;
+                switchTheme(nextTheme);
+            });
+            
+            // 全屏按钮
+            document.getElementById('btn-fullscreen').addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        showToast(`全屏请求失败: ${err.message}`);
+                    });
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                }
+            });
+            
+            // 窗口大小调整
+            window.addEventListener('resize', onWindowResize);
+            
+            // 上传照片按钮
+            document.getElementById('btn-add-photo').addEventListener('click', () => {
+                document.getElementById('file-input').click();
+            });
+            
+            document.getElementById('file-input').addEventListener('change', handleFileUpload);
+            
+            // 书信相关按钮
+            document.getElementById('btn-write-letter').addEventListener('click', () => {
+                document.getElementById('letter-editor-modal').style.display = 'flex';
+                document.getElementById('letter-text-input').value = STATE.letterContent;
+            });
+            
+            document.getElementById('btn-cancel-letter').addEventListener('click', () => {
+                document.getElementById('letter-editor-modal').style.display = 'none';
+            });
+            
+            document.getElementById('btn-save-letter').addEventListener('click', () => {
+                STATE.letterContent = document.getElementById('letter-text-input').value;
+                document.getElementById('letter-editor-modal').style.display = 'none';
+                showToast('书信已保存');
+            });
+            
+            document.getElementById('btn-close-letter-mode').addEventListener('click', exitLetterMode);
+        }
+        
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (!files.length) return;
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) continue;
+                
                 const reader = new FileReader();
-                reader.onload = (ev) => new THREE.TextureLoader().load(ev.target.result, t => { t.colorSpace = THREE.SRGBColorSpace; addPhotoToScene(t); });
-                reader.readAsDataURL(f);
+                reader.onload = function(e) {
+                    addPhotoToScene(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // 清空输入，允许重复上传同一文件
+            event.target.value = '';
+        }
+        
+        function addPhotoToScene(imageUrl) {
+            const loader = new THREE.TextureLoader();
+            loader.load(imageUrl, (texture) => {
+                texture.colorSpace = THREE.SRGBColorSpace;
+                
+                // 创建照片平面
+                const aspect = texture.image.width / texture.image.height;
+                const size = 2.5;
+                const geometry = new THREE.PlaneGeometry(aspect * size, size);
+                
+                // 创建相框
+                const frameGeometry = new THREE.BoxGeometry(aspect * size + 0.3, size + 0.3, 0.2);
+                
+                // 根据当前主题选择相框材质
+                let frameMaterial;
+                if (STATE.currentThemeIndex === 0) frameMaterial = matLib.frameGold;
+                else if (STATE.currentThemeIndex === 1) frameMaterial = matLib.frameIce;
+                else frameMaterial = matLib.frameBarbie;
+                
+                // 创建照片组合
+                const photoGroup = new THREE.Group();
+                const frameMesh = new THREE.Mesh(frameGeometry, frameMaterial);
+                frameMesh.position.z = -0.1;
+                const photoMesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ map: texture }));
+                
+                photoGroup.add(frameMesh);
+                photoGroup.add(photoMesh);
+                photoMeshGroup.add(photoGroup);
+                
+                // 添加到粒子系统
+                const particle = new Particle(photoGroup, 'PHOTO');
+                particleSystem.push(particle);
+                
+                showToast('照片已添加');
             });
         }
- 
-        function clearPhotos() {
-            const photosToRemove = particleSystem.filter(p => p.type === 'PHOTO');
-            photosToRemove.forEach(p => {
-                photoMeshGroup.remove(p.mesh);
-                p.mesh.traverse(child => {
-                    if (child.isMesh) { if (child.geometry) child.geometry.dispose(); if (child.material) { if(Array.isArray(child.material)) child.material.forEach(m=>m.dispose()); else child.material.dispose(); } }
-                });
-            });
-            particleSystem = particleSystem.filter(p => p.type !== 'PHOTO');
-        }
- 
-        function exportSceneData() {
-            const photos = particleSystem.filter(p => p.type === 'PHOTO').map(p => { try { return p.mesh.children[1].material.map.image.src; } catch(e) { return null; } }).filter(src => src !== null);
-            const exportData = { music: STATE.musicData, letter: STATE.letterContent, photos: photos, theme: STATE.currentThemeIndex, title: document.getElementById('main-title').innerText, isGestureSwitchEnabled: STATE.isGestureSwitchEnabled };
-            const blob = new Blob([JSON.stringify(exportData)], {type: "application/json"});
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = "tree.json"; a.click(); URL.revokeObjectURL(url);
-        }
- 
-        function importSceneData(jsonData) {
-            try {
-                const data = JSON.parse(jsonData);
-                if (data.title) document.getElementById('main-title').innerText = data.title;
-                if (data.isGestureSwitchEnabled !== undefined) {
-                    STATE.isGestureSwitchEnabled = data.isGestureSwitchEnabled;
-                    const btn = document.getElementById('btn-switch-theme');
-                    if (STATE.isGestureSwitchEnabled) btn.classList.remove('disabled'); else btn.classList.add('disabled');
-                }
-                if (data.letter) STATE.letterContent = data.letter;
-                if (data.music) {
-                    STATE.musicData = data.music; const audioEl = document.getElementById('bg-music');
-                    audioEl.src = data.music; audioEl.currentTime = 0; audioEl.play().catch(console.warn);
-                }
-                clearPhotos();
-                if (data.photos && Array.isArray(data.photos)) {
-                    const loader = new THREE.TextureLoader();
-                    data.photos.forEach(src => { loader.load(src, t => { t.colorSpace = THREE.SRGBColorSpace; addPhotoToScene(t); }); });
-                }
-                if (data.theme !== undefined) switchTheme(data.theme);
-                document.documentElement.requestFullscreen().catch(err => { console.log("Auto fullscreen blocked:", err); });
-            } catch (e) { console.error("Import failed:", e); alert("文件格式错误，无法导入"); }
-        }
- 
+        
         function setupLetterSystem() {
-            const modal = document.getElementById('letter-editor-modal'), txt = document.getElementById('letter-text-input');
-            document.getElementById('btn-write-letter').onclick = (e) => { e.stopPropagation(); modal.style.display = 'flex'; txt.value = STATE.letterContent; };
-            document.getElementById('btn-cancel-letter').onclick = (e) => { e.stopPropagation(); modal.style.display = 'none'; };
-            document.getElementById('btn-save-letter').onclick = (e) => { e.stopPropagation(); STATE.letterContent = txt.value.trim(); modal.style.display = 'none'; triggerFireworks(3); };
-            document.getElementById('btn-close-letter-mode').onclick = (e) => { e.stopPropagation(); exitLetterMode(); };
-        }
- 
-        function enterLetterMode() {
-            if (STATE.mode === 'LETTER') return; STATE.mode = 'LETTER';
-            const overlay = document.getElementById('letter-overlay'), paper = document.querySelector('.letter-paper'), display = document.getElementById('letter-content-display');
-            overlay.style.display = 'flex'; requestAnimationFrame(() => { overlay.style.opacity = 1; paper.style.transform = 'translateY(0)'; });
-            display.textContent = ''; display.classList.remove('cursor');
-            let i = 0;
-            const typeWriter = () => {
-                if (STATE.mode !== 'LETTER') return;
-                if (i < STATE.letterContent.length) { display.textContent += STATE.letterContent.charAt(i++); display.scrollTop = display.scrollHeight; STATE.letterTyper = setTimeout(typeWriter, 100); }
-                else display.classList.remove('cursor');
+            // 初始化打字机效果
+            STATE.letterTyper = {
+                text: '',
+                current: 0,
+                speed: 50,
+                interval: null,
+                done: false
             };
-            STATE.letterStartTimer = setTimeout(() => { if(STATE.mode==='LETTER') { display.classList.add('cursor'); typeWriter(); } }, 2000);
-            triggerFireworks(5);
         }
- 
+        
+        function enterLetterMode() {
+            STATE.mode = 'LETTER';
+            const overlay = document.getElementById('letter-overlay');
+            overlay.style.display = 'flex';
+            
+            // 淡入效果
+            setTimeout(() => {
+                overlay.style.opacity = 1;
+                document.querySelector('.letter-paper').style.transform = 'translateY(0)';
+            }, 10);
+            
+            // 启动打字效果
+            startLetterTyping();
+        }
+        
         function exitLetterMode() {
-            STATE.mode = 'TREE'; clearTimeout(STATE.letterTyper); clearTimeout(STATE.letterStartTimer);
-            const overlay = document.getElementById('letter-overlay'), paper = document.querySelector('.letter-paper');
-            overlay.style.opacity = 0; paper.style.transform = 'translateY(20px)';
-            setTimeout(() => { overlay.style.display = 'none'; }, 500); STATE.spinVel.set(0,0);
+            const overlay = document.getElementById('letter-overlay');
+            overlay.style.opacity = 0;
+            document.querySelector('.letter-paper').style.transform = 'translateY(20px)';
+            
+            // 淡出效果后隐藏
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                STATE.mode = 'TREE';
+                stopLetterTyping();
+            }, 1500);
         }
-
+        
+        function startLetterTyping() {
+            stopLetterTyping();
+            const display = document.getElementById('letter-content-display');
+            display.innerHTML = '';
+            STATE.letterTyper.text = STATE.letterContent || '请先撰写你的书信内容...';
+            STATE.letterTyper.current = 0;
+            STATE.letterTyper.done = false;
+            
+            STATE.letterTyper.interval = setInterval(() => {
+                if (STATE.letterTyper.current < STATE.letterTyper.text.length) {
+                    display.textContent += STATE.letterTyper.text[STATE.letterTyper.current];
+                    STATE.letterTyper.current++;
+                    // 自动滚动到底部
+                    display.scrollTop = display.scrollHeight;
+                } else {
+                    stopLetterTyping();
+                    STATE.letterTyper.done = true;
+                }
+            }, STATE.letterTyper.speed);
+        }
+        
+        function stopLetterTyping() {
+            if (STATE.letterTyper.interval) {
+                clearInterval(STATE.letterTyper.interval);
+                STATE.letterTyper.interval = null;
+            }
+        }
+        
         function setupMouseInteraction() {
-            const container = document.getElementById('canvas-container');
-            container.addEventListener('mousedown', (e) => { STATE.mouse.isDragging = true; STATE.mouse.x = e.clientX; STATE.mouse.y = e.clientY; });
-            window.addEventListener('mouseup', () => STATE.mouse.isDragging = false);
-            window.addEventListener('mousemove', (e) => {
-                if(STATE.mouse.isDragging) {
-                    const dx = e.clientX - STATE.mouse.x; const dy = e.clientY - STATE.mouse.y;
-                    mainGroup.rotation.y += dx * 0.005; mainGroup.rotation.x += dy * 0.005;
-                    STATE.rotation.x = mainGroup.rotation.x; STATE.rotation.y = mainGroup.rotation.y;
-                    STATE.mouse.x = e.clientX; STATE.mouse.y = e.clientY;
+            let prevMouseX = 0, prevMouseY = 0;
+            
+            // 鼠标按下
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                STATE.mouse.isDragging = true;
+                prevMouseX = e.clientX;
+                prevMouseY = e.clientY;
+            });
+            
+            // 鼠标移动
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (STATE.mouse.isDragging) {
+                    const deltaX = e.clientX - prevMouseX;
+                    const deltaY = e.clientY - prevMouseY;
+                    
+                    STATE.rotation.y += deltaX * 0.005;
+                    STATE.rotation.x += deltaY * 0.005;
+                    STATE.rotation.x = Math.max(-Math.PI/4, Math.min(Math.PI/4, STATE.rotation.x));
+                    
+                    prevMouseX = e.clientX;
+                    prevMouseY = e.clientY;
                 }
             });
-            container.addEventListener('wheel', (e) => {
+            
+            // 鼠标释放
+            window.addEventListener('mouseup', () => {
+                STATE.mouse.isDragging = false;
+            });
+            
+            // 鼠标滚轮
+            renderer.domElement.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                STATE.mouse.targetScatter += e.deltaY * 0.005;
-                STATE.mouse.targetScatter = THREE.MathUtils.clamp(STATE.mouse.targetScatter, 1.0, 5.0);
-                if (STATE.mouse.targetScatter > 1.2) { STATE.mode = 'SCATTER'; STATE.scatterScale = STATE.mouse.targetScatter; } 
-                else { STATE.mode = 'TREE'; STATE.scatterScale = 1.0; }
-            }, { passive: false });
-        }
- 
-        async function initMediaPipe() {
-            // Updated to catch network errors
-            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
-            handLandmarker = await HandLandmarker.createFromOptions(vision, { baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`, delegate: "GPU" }, runningMode: "VIDEO", numHands: 1 });
-            video = document.getElementById('webcam'); canvasCtx = document.getElementById('webcam-preview').getContext('2d'); drawingUtils = new DrawingUtils(canvasCtx);
-            if (navigator.mediaDevices?.getUserMedia) {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: {ideal: 640}, height: {ideal: 480} } });
-                video.srcObject = stream;
-                video.addEventListener("loadeddata", () => { 
-                    video.play(); document.getElementById('webcam-wrapper').style.opacity = 1;
-                    const aspect = video.videoWidth / video.videoHeight;
-                    document.getElementById('webcam-wrapper').style.height = (120/aspect) + 'px';
-                    document.getElementById('webcam-preview').width = video.videoWidth; document.getElementById('webcam-preview').height = video.videoHeight;
-                    predictWebcam(); 
-                });
-            }
-        }
- 
-        let lastVideoTime = -1;
-        async function predictWebcam() {
-            if (lastVideoTime !== video.currentTime && handLandmarker) {
-                lastVideoTime = video.currentTime;
-                const result = handLandmarker.detectForVideo(video, performance.now());
-                canvasCtx.clearRect(0, 0, canvasCtx.canvas.width, canvasCtx.canvas.height);
-                canvasCtx.drawImage(video, 0, 0, canvasCtx.canvas.width, canvasCtx.canvas.height);
-                if (result.landmarks?.[0]) {
-                    drawingUtils.drawConnectors(result.landmarks[0], HandLandmarker.HAND_CONNECTIONS, { color: "#d4af37", lineWidth: 3 });
-                    drawingUtils.drawLandmarks(result.landmarks[0], { color: "#ffffff", lineWidth: 1, radius: 3 });
-                    document.getElementById('webcam-wrapper').style.borderColor = "#00ff00";
-                    processGestures(result.landmarks[0]);
+                if (e.deltaY < 0) {
+                    // 滚轮上滚 - 聚集
+                    STATE.mouse.targetScatter = Math.max(1.0, STATE.mouse.targetScatter - 0.2);
+                    if (STATE.mode === 'SCATTER' && STATE.mouse.targetScatter === 1.0) {
+                        STATE.mode = 'TREE';
+                    }
                 } else {
-                    STATE.hand.detected = false; document.getElementById('webcam-wrapper').style.borderColor = "rgba(212, 175, 55, 0.5)";
-                    updateHud('未检测到手', '-');
-                }
-            }
-            requestAnimationFrame(predictWebcam);
-        }
-
-        function updateHud(status, action) {
-            const hud = document.getElementById('gesture-hud');
-            document.getElementById('hud-status').innerText = status;
-            document.getElementById('hud-action').innerText = action;
-            hud.style.opacity = status === '未检测到手' ? 0.3 : 1;
-        }
- 
-        function processGestures(lm) {
-            STATE.hand.detected = true;
-            if (STATE.mode === 'LETTER') { updateHud('书信模式', '忽略手势'); return; }
-            const dist = (i, j) => Math.hypot(lm[i].x - lm[j].x, lm[i].y - lm[j].y);
-            const dIndex = dist(8,0), dMiddle = dist(12,0), dRing = dist(16,0), dPinky = dist(20,0);
-            const palmSize = dist(0, 9); 
-            if (dist(4,8) < 0.05 && dMiddle > 0.15 && dMiddle > dIndex * 1.2) {
-                updateHud('手势: OK', '尝试触发书信');
-                if (STATE.letterContent && STATE.letterContent.trim() !== "") {
-                    if (Date.now() - STATE.letterLastTriggerTime > 1000) { STATE.letterLastTriggerTime = Date.now(); enterLetterMode(); }
-                }
-                return;
-            }
-            const areFourFingersOpen = (dIndex > palmSize * 1.3) && (dMiddle > palmSize * 1.3) && (dRing > palmSize * 1.3) && (dPinky > palmSize * 1.3);
-            const isThumbTucked = dist(4, 9) < palmSize * 0.6;
-            const isOldSwitchGesture = areFourFingersOpen && isThumbTucked;
-            const isThumbExtended = dist(4, 9) > palmSize * 0.85; 
-            const isIndexCurled = dist(8, 9) < palmSize * 0.65;  
-            const isMiddleCurled = dist(12, 9) < palmSize * 0.65; 
-            const isRingCurled = dist(16, 9) < palmSize * 0.65;  
-            const isPinkyCurled = dist(20, 9) < palmSize * 0.65; 
-            const isThumbsUpGesture = isThumbExtended && isIndexCurled && isMiddleCurled && isRingCurled && isPinkyCurled;
-            if (isOldSwitchGesture || isThumbsUpGesture) {
-                updateHud('手势: 点赞', '切换主题');
-                if (STATE.isGestureSwitchEnabled) {
-                    if (Date.now() - STATE.gestureDebounceTimer > 2000) { switchTheme((STATE.currentThemeIndex + 1) % 3); STATE.gestureDebounceTimer = Date.now(); }
-                }
-                return;
-            }
-            const isPointing = dIndex > 0.1 && dMiddle < dIndex*0.7 && dRing < dIndex*0.7;
-            const avgSpread = (dIndex+dMiddle+dRing+dPinky)/4, isPalmOpen = avgSpread > CONFIG.gestures.palmOpenThreshold;
-            if (isPointing) { 
-                updateHud('手势: 指点', '聚焦照片/星星'); STATE.mode = 'FOCUS';
-                if (!STATE.wasPointing) {
-                    const photos = particleSystem.filter(p => p.type === 'PHOTO');
-                    STATE.focusTarget = photos.length ? photos[(++STATE.currentPhotoIndex)%photos.length].mesh : STATE.starMesh;
-                }
-                STATE.wasPointing = true; STATE.hasPalmCenter = false; STATE.spinVel.x *= 0.9; STATE.spinVel.y *= 0.9;
-            } else { 
-                STATE.wasPointing = false;
-                if (isPalmOpen) {
-                    updateHud('手势: 五指张开', '粒子散开 & 旋转');
-                    if (STATE.mode !== 'SCATTER' || !STATE.hasPalmCenter) { STATE.palmCenter = {x: lm[9].x, y: lm[9].y}; STATE.hasPalmCenter = true; STATE.gestureBaseSpread = avgSpread; STATE.scatterScale = 1.0; }
+                    // 滚轮下滚 - 散开
                     STATE.mode = 'SCATTER';
-                    if (STATE.gestureBaseSpread) STATE.scatterScale += (THREE.MathUtils.clamp(Math.pow(STATE.gestureBaseSpread/avgSpread, 2), 0.1, 5.0) - STATE.scatterScale) * 0.15;
-                    const gain = CONFIG.gestures.sensitivity, dx = lm[9].x - STATE.palmCenter.x, dy = lm[9].y - STATE.palmCenter.y;
-                    STATE.spinVel.x += (THREE.MathUtils.clamp(-dy*gain, -3, 3) - STATE.spinVel.x) * 0.2;
-                    STATE.spinVel.y += (THREE.MathUtils.clamp(dx*gain, -3, 3) - STATE.spinVel.y) * 0.2;
-                } else {
-                    updateHud('手势: 自然放松', '圣诞树形态');
-                    STATE.mode = 'TREE'; STATE.hasPalmCenter = false; STATE.scatterScale = 1.0; STATE.spinVel.x *= 0.9; STATE.spinVel.y *= 0.9;
+                    STATE.mouse.targetScatter = Math.min(3.0, STATE.mouse.targetScatter + 0.2);
                 }
+            });
+            
+            // 触摸设备支持
+            setupTouchEvents();
+        }
+        
+        function setupTouchEvents() {
+            const canvas = renderer.domElement;
+            let touchStartX, touchStartY;
+            
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    STATE.mouse.isDragging = true;
+                }
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                if (STATE.mouse.isDragging && e.touches.length === 1) {
+                    const deltaX = e.touches[0].clientX - touchStartX;
+                    const deltaY = e.touches[0].clientY - touchStartY;
+                    
+                    STATE.rotation.y += deltaX * 0.005;
+                    STATE.rotation.x += deltaY * 0.005;
+                    STATE.rotation.x = Math.max(-Math.PI/4, Math.min(Math.PI/4, STATE.rotation.x));
+                    
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                }
+                e.preventDefault();
+            });
+            
+            canvas.addEventListener('touchend', () => {
+                STATE.mouse.isDragging = false;
+            });
+        }
+        
+        async function initMediaPipe() {
+            const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm"
+            );
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+                    delegate: "GPU"
+                },
+                runningMode: "VIDEO",
+                numHands: 1
+            });
+            
+            // 设置摄像头
+            video = document.getElementById("webcam");
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 480, height: 360 }
+            });
+            video.srcObject = stream;
+            
+            const canvasElement = document.getElementById("webcam-preview");
+            canvasCtx = canvasElement.getContext("2d");
+            drawingUtils = new DrawingUtils(canvasCtx);
+            
+            // 调整预览大小
+            canvasElement.width = 480;
+            canvasElement.height = 360;
+            
+            // 显示摄像头预览
+            setTimeout(() => {
+                document.getElementById('webcam-wrapper').style.opacity = 1;
+                document.getElementById('gesture-hud').style.opacity = 1;
+            }, 1000);
+            
+            // 开始处理视频
+            video.play().then(() => {
+                setTimeout(processVideo, 100);
+            });
+        }
+        
+        function processVideo() {
+            if (!handLandmarker || !video || video.paused) {
+                requestAnimationFrame(processVideo);
+                return;
             }
-            if (STATE.mode !== 'FOCUS') {
-                STATE.hand.x += ((lm[9].x - 0.5)*3.0 - STATE.hand.x) * 0.1;
-                STATE.hand.y += ((lm[9].y - 0.5)*3.0 - STATE.hand.y) * 0.1;
+            
+            const results = handLandmarker.detectForVideo(video, performance.now());
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasCtx.canvas.width, canvasCtx.canvas.height);
+            
+            if (results.handedness.length > 0) {
+                document.getElementById('hud-status').textContent = '已检测到手';
+                STATE.hand.detected = true;
+                
+                // 绘制手部关键点
+                for (const landmarks of results.landmarks) {
+                    drawingUtils.drawLandmarks(landmarks, { color: "#d4af37", lineWidth: 2 });
+                    drawingUtils.drawConnectors(landmarks, HandLandmarker.HAND_CONNECTIONS, { color: "#aaaaaa", lineWidth: 1 });
+                    
+                    // 计算手掌中心
+                    const palmCenter = calculatePalmCenter(landmarks);
+                    STATE.palmCenter.x = palmCenter.x / canvasCtx.canvas.width;
+                    STATE.palmCenter.y = palmCenter.y / canvasCtx.canvas.height;
+                    STATE.hasPalmCenter = true;
+                    
+                    // 检测手势
+                    detectGestures(landmarks);
+                }
+            } else {
+                document.getElementById('hud-status').textContent = '未检测到手';
+                document.getElementById('hud-action').textContent = '-';
+                STATE.hand.detected = false;
+                STATE.hasPalmCenter = false;
             }
+            
+            canvasCtx.restore();
+            requestAnimationFrame(processVideo);
+        }
+        
+        function calculatePalmCenter(landmarks) {
+            // 取手掌几个关键点的平均值作为中心
+            const palmIndices = [0, 1, 5, 9, 13, 17];
+            let x = 0, y = 0;
+            
+            for (const idx of palmIndices) {
+                x += landmarks[idx].x * canvasCtx.canvas.width;
+                y += landmarks[idx].y * canvasCtx.canvas.height;
+            }
+            
+            return { x: x / palmIndices.length, y: y / palmIndices.length };
+        }
+        
+        function detectGestures(landmarks) {
+            // 检测手掌是否张开
+            const thumbOpen = isFingerOpen(landmarks, 4, 3, 2, 1, 0);
+            const indexOpen = isFingerOpen(landmarks, 8, 7, 6, 5, 0);
+            const middleOpen = isFingerOpen(landmarks, 12, 11, 10, 9, 0);
+            const ringOpen = isFingerOpen(landmarks, 16, 15, 14, 13, 0);
+            const pinkyOpen = isFingerOpen(landmarks, 20, 19, 18, 17, 0);
+            
+            const fingersOpen = [thumbOpen, indexOpen, middleOpen, ringOpen, pinkyOpen];
+            const openCount = fingersOpen.filter(open => open).length;
+            
+            // 手势判断
+            let gesture = '-';
+            if (openCount === 5) {
+                gesture = '手掌张开';
+                handleOpenPalmGesture();
+            } else if (indexOpen && !middleOpen && !ringOpen && !pinkyOpen) {
+                gesture = '指向';
+                handlePointingGesture(landmarks[8]);
+            } else if (!indexOpen && !middleOpen && !ringOpen && !pinkyOpen && thumbOpen) {
+                gesture = '点赞';
+                triggerFireworks(2);
+            }
+            
+            document.getElementById('hud-action').textContent = gesture;
+        }
+        
+        function isFingerOpen(landmarks, tipIdx, dipIdx, pipIdx, mcpIdx, palmIdx) {
+            const tip = landmarks[tipIdx];
+            const dip = landmarks[dipIdx];
+            const pip = landmarks[pipIdx];
+            const mcp = landmarks[mcpIdx];
+            const palm = landmarks[palmIdx];
+            
+            // 计算指尖到指根的距离
+            const tipToMcp = distance(tip, mcp);
+            // 计算指节到指根的距离
+            const pipToMcp = distance(pip, mcp);
+            
+            // 如果指尖到指根的距离远大于指节到指根的距离，则认为手指张开
+            return tipToMcp > pipToMcp * 1.5;
+        }
+        
+        function distance(a, b) {
+            return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+        }
+        
+        function handleOpenPalmGesture() {
+            // 防抖处理
+            const now = Date.now();
+            if (now - STATE.gestureDebounceTimer < 1000) return;
+            STATE.gestureDebounceTimer = now;
+            
+            // 切换模式
+            if (STATE.mode === 'TREE') {
+                STATE.mode = 'SCATTER';
+                STATE.mouse.targetScatter = 2.0;
+            } else if (STATE.mode === 'SCATTER') {
+                STATE.mode = 'TREE';
+            }
+        }
+        
+        function handlePointingGesture(indexTip) {
+            // 计算 normalized 坐标 (-1 到 1)
+            const x = (indexTip.x * 2 - 1) * CONFIG.gestures.sensitivity;
+            const y = (indexTip.y * -2 + 1) * CONFIG.gestures.sensitivity;
+            
+            // 应用旋转
+            STATE.rotation.y = x;
+            STATE.rotation.x = y;
+            STATE.rotation.x = Math.max(-Math.PI/4, Math.min(Math.PI/4, STATE.rotation.x));
         }
  
         function animate() {
             requestAnimationFrame(animate);
-            const dt = clock.getDelta(); STATE.time = clock.elapsedTime;
-            const inputX = STATE.hand.detected ? STATE.hand.x : 0; 
-            STATE.fireworks.forEach(fw => fw.update(dt)); STATE.fireworks = STATE.fireworks.filter(fw => fw.active);
-            if (STATE.mode === 'LETTER') {
-                STATE.rotation.x = THREE.MathUtils.lerp(STATE.rotation.x, Math.PI/4, dt * 1.5); STATE.rotation.y -= 0.1 * dt;
-            } else if (STATE.mode === 'TREE') {
-                const baseSpeed = (STATE.currentThemeIndex === 1) ? 0.6 : 0.4;
-                STATE.rotation.y -= baseSpeed * dt; 
-                STATE.rotation.x = THREE.MathUtils.lerp(STATE.rotation.x, 0.15, dt * 2.0);
-                mainGroup.rotation.z = THREE.MathUtils.lerp(mainGroup.rotation.z, inputX * 0.1, dt * 2);
-            } else if (STATE.mode === 'SCATTER') {
-                STATE.rotation.y += STATE.spinVel.y * dt; STATE.rotation.x += STATE.spinVel.x * dt;
-                if (!STATE.hand.detected) { STATE.spinVel.x *= 0.95; STATE.spinVel.y *= 0.95; }
-            } else if (STATE.mode === 'FOCUS') {
-                _invMatrix.copy(mainGroup.matrixWorld).invert();
-            }
-            mainGroup.rotation.y = STATE.rotation.y; mainGroup.rotation.x = STATE.rotation.x; 
-            if (galaxySystem && galaxySystem.visible) { bgGroup.rotation.y -= 0.05 * dt; } 
-            else if ((snowSystem && snowSystem.visible) || (heartSystem && heartSystem.visible)) {
-                const sys = snowSystem.visible ? snowSystem : heartSystem;
-                const positions = sys.geometry.attributes.position.array;
-                const velocities = sys.geometry.attributes.velocity.array;
-                const count = (snowSystem.visible) ? CONFIG.particles.snowCount : 1500;
-                for(let i=0; i<count; i++) {
-                    positions[i*3+1] -= CONFIG.particles.snowSpeed * velocities[i] * dt;
-                    if (positions[i*3+1] < -50) { positions[i*3+1] = 50; }
-                }
-                sys.geometry.attributes.position.needsUpdate = true;
-                bgGroup.rotation.y -= 0.02 * dt; 
-            }
-            if (STATE.starMesh) {
-                STATE.starMesh.rotation.y -= dt; STATE.starMesh.rotation.z = Math.sin(STATE.time) * 0.2;
-                STATE.starMesh.scale.setScalar(1.0 + Math.sin(STATE.time * 2) * 0.1);
-            }
-            particleSystem.forEach(p => p.update(dt, STATE.time, STATE.mode, STATE.focusTarget, (STATE.mode === 'FOCUS' ? _invMatrix : null)));
-            composer.render();
-        }
- 
-        function setupEvents() {
-            window.addEventListener('resize', () => { camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); composer.setSize(window.innerWidth, window.innerHeight); });
-            const fileInput = document.getElementById('file-input');
-            document.getElementById('btn-add-photo').onclick = (e) => { e.stopPropagation(); fileInput.click(); };
-            fileInput.onchange = handleImageUpload;
-            const musicInput = document.getElementById('music-input'), audioEl = document.getElementById('bg-music');
-            document.getElementById('btn-bg-music').onclick = (e) => { e.stopPropagation(); musicInput.click(); };
-            musicInput.onchange = (e) => { 
-                if(e.target.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) { STATE.musicData = evt.target.result; audioEl.src = evt.target.result; audioEl.currentTime = 0; audioEl.play().catch(console.warn); };
-                    reader.readAsDataURL(e.target.files[0]);
-                } 
-            };
-            document.getElementById('btn-set-title').onclick = (e) => {
-                e.stopPropagation(); const currentTitle = document.getElementById('main-title').innerText;
-                const newTitle = prompt("请输入页面标题:", currentTitle);
-                if (newTitle !== null) { document.getElementById('main-title').innerText = newTitle; }
-            };
-            const fsBtn = document.getElementById('btn-fullscreen');
-            fsBtn.onclick = (e) => { e.stopPropagation(); document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); };
-            document.addEventListener('fullscreenchange', () => { 
-                const isFs = !!document.fullscreenElement; fsBtn.textContent = isFs ? '取消全屏' : '全屏显示'; 
-                const colMedia = document.getElementById('col-media'); const btnImport = document.getElementById('btn-import'); const btnExport = document.getElementById('btn-export'); const btnSwitch = document.getElementById('btn-switch-theme');
-                if (isFs) { colMedia.style.display = 'none'; btnImport.style.display = 'none'; btnExport.style.display = 'none'; btnSwitch.style.display = 'none'; } 
-                else { colMedia.style.display = 'flex'; btnImport.style.display = 'block'; btnExport.style.display = 'block'; btnSwitch.style.display = 'block'; }
+            const dt = clock.getDelta();
+            STATE.time += dt;
+            
+            // 更新旋转
+            mainGroup.rotation.x = STATE.rotation.x;
+            mainGroup.rotation.y = STATE.rotation.y;
+            
+            // 更新散点比例
+            STATE.scatterScale += (STATE.mouse.targetScatter - STATE.scatterScale) * 5 * dt;
+            
+            // 更新粒子
+            const invMatrix = _invMatrix.copy(mainGroup.matrixWorld).invert();
+            particleSystem.forEach(particle => {
+                particle.update(dt, STATE.time, STATE.mode, STATE.focusTarget, invMatrix);
             });
-            document.getElementById('btn-export').onclick = (e) => { e.stopPropagation(); exportSceneData(); };
-            const importInput = document.getElementById('import-input');
-            document.getElementById('btn-import').onclick = (e) => { e.stopPropagation(); importInput.click(); };
-            importInput.onchange = (e) => {
-                if (e.target.files[0]) {
-                    const reader = new FileReader(); reader.onload = (evt) => importSceneData(evt.target.result); reader.readAsText(e.target.files[0]);
+            
+            // 更新背景效果
+            updateBackgrounds(dt);
+            
+            // 更新烟花
+            STATE.fireworks.forEach(fw => fw.update(dt));
+            // 移除已结束的烟花
+            STATE.fireworks = STATE.fireworks.filter(fw => fw.active);
+            
+            // 渲染
+            composer.render(scene, camera);
+        }
+        
+        function updateBackgrounds(dt) {
+            // 更新雪花
+            if (snowSystem.visible) {
+                const positions = snowSystem.geometry.attributes.position.array;
+                const velocities = snowSystem.geometry.attributes.velocity.array;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    // 下落
+                    positions[i + 1] -= velocities[i / 3] * dt * CONFIG.particles.snowSpeed * 0.1;
+                    
+                    // 超出边界重置
+                    if (positions[i + 1] < -50) {
+                        positions[i] = (Math.random() - 0.5) * 100;
+                        positions[i + 1] = 50;
+                        positions[i + 2] = (Math.random() - 0.5) * 60;
+                    }
                 }
-            };
-            const btnSwitch = document.getElementById('btn-switch-theme');
-            btnSwitch.onclick = (e) => {
-                e.stopPropagation(); STATE.isGestureSwitchEnabled = !STATE.isGestureSwitchEnabled;
-                btnSwitch.textContent = STATE.isGestureSwitchEnabled ? "颜色切换" : "颜色切换";
-                if (STATE.isGestureSwitchEnabled) { btnSwitch.classList.remove('disabled'); } else { btnSwitch.classList.add('disabled'); }
-            };
+                
+                snowSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            // 更新爱心
+            if (heartSystem.visible) {
+                const positions = heartSystem.geometry.attributes.position.array;
+                const velocities = heartSystem.geometry.attributes.velocity.array;
+                
+                for (let i = 0; i < positions.length; i += 3) {
+                    // 上升
+                    positions[i + 1] += velocities[i / 3] * dt * 5;
+                    
+                    // 超出边界重置
+                    if (positions[i + 1] > 60) {
+                        positions[i] = (Math.random() - 0.5) * 120;
+                        positions[i + 1] = -60;
+                        positions[i + 2] = (Math.random() - 0.5) * 80;
+                    }
+                }
+                
+                heartSystem.geometry.attributes.position.needsUpdate = true;
+            }
+            
+            // 旋转星系背景
+            galaxySystem.rotation.y += dt * 0.001;
         }
  
-        init();
+        // 初始化应用
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
